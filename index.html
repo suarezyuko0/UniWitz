@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniWitz - Universal Wizards Math Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        magicDark: '#0b0817',
+                        magicCard: '#15102a',
+                        magicBorder: '#2e2252',
+                        magicPurple: '#7c3aed',
+                        magicGold: '#fbbf24',
+                    },
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0817;
+            background-image: radial-gradient(circle at 50% 15%, #241442 0%, #0b0817 75%);
+            min-height: 100vh;
+            color: #f3f4f6;
+        }
+        .magical-glow {
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.25);
+        }
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .float-anim {
+            animation: float 4s ease-in-out infinite;
+        }
+        /* Custom scrollbar for tables & modals */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0817; }
+        ::-webkit-scrollbar-thumb { background: #2e2252; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
+    </style>
+</head>
+<body class="font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- HEADER -->
+    <header class="border-b border-magicBorder bg-magicDark/90 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('dashboard')">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-amber-500 flex items-center justify-center gold-glow">
+                    <i class="fa-solid fa-hat-wizard text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-cinzel text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-200 via-purple-300 to-amber-400 bg-clip-text text-transparent">UniWitz</h1>
+                    <p class="text-xs text-purple-300 tracking-wider font-medium">UNIVERSAL WIZARDS</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <!-- Logged in Student Info Badge -->
+                <div id="logged-user-badge" class="hidden items-center space-x-3 bg-magicCard border border-magicBorder px-3.5 py-1.5 rounded-2xl">
+                    <span id="nav-avatar" class="text-2xl">🧙‍♂️</span>
+                    <div class="text-left">
+                        <div id="nav-username" class="text-xs font-bold text-white truncate max-w-[100px] sm:max-w-[140px]">Wizard</div>
+                        <div class="text-[10px] text-amber-300"><span id="nav-score">0</span> pts</div>
+                    </div>
+                </div>
+
+                <button onclick="openTeacherModal()" class="bg-magicCard hover:bg-purple-900/50 border border-magicBorder text-purple-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-chalkboard-user text-amber-400"></i>
+                    <span class="hidden sm:inline">Teacher Portal</span>
+                </button>
+
+                <button id="logout-btn" onclick="logoutStudent()" class="hidden bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900/50 text-rose-300 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- VIEW 1: STUDENT LOGIN & AVATAR PICKER -->
+        <div id="view-login" class="max-w-xl mx-auto py-6">
+            <div class="bg-magicCard border border-magicBorder rounded-3xl p-8 md:p-10 magical-glow space-y-8">
+                <div class="text-center space-y-2">
+                    <span class="bg-purple-500/10 text-purple-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-purple-500/20">Portal Entry</span>
+                    <h2 class="font-cinzel text-3xl font-bold text-white">Enter the Arcane Academy</h2>
+                    <p class="text-purple-300 text-sm">Choose your wizard avatar and enter your name to begin your mathematical quest.</p>
+                </div>
+
+                <form onsubmit="handleStudentLogin(event)" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">Student Name</label>
+                        <input type="text" id="login-name" required placeholder="e.g. Harry, Hermione, Merlin..." maxlength="25"
+                            class="w-full bg-magicDark border border-magicBorder focus:border-amber-400 text-white font-semibold py-3.5 px-4 rounded-2xl outline-none transition-all placeholder:text-gray-600">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">Choose Your Avatar</label>
+                        <div class="grid grid-cols-5 gap-3" id="avatar-picker-grid">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-magicDark font-bold py-4 rounded-2xl shadow-lg transition-all text-base gold-glow flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-wand-sparkles"></i>
+                        <span>Start Quest</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- VIEW 2: STUDENT DASHBOARD / HUB -->
+        <div id="view-dashboard" class="hidden space-y-8">
+            <!-- Welcome Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-900/60 via-indigo-950/80 to-magicCard border border-magicBorder p-8 md:p-10 magical-glow flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <span id="dash-avatar" class="text-4xl">🧙‍♂️</span>
+                        <div>
+                            <span class="bg-amber-400/10 text-amber-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-amber-400/20">Apprentice Wizard</span>
+                            <h2 id="dash-welcome-name" class="font-cinzel text-3xl md:text-4xl font-bold text-white mt-1">Welcome back!</h2>
+                        </div>
+                    </div>
+                    <p class="text-purple-200 text-sm max-w-xl">
+                        Your spellbook awaits. Choose a trial below, solve equations to build your streak, earn magical badges, and climb the Leaderboard!
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <button onclick="navigateTo('leaderboard')" class="bg-magicCard hover:bg-purple-900/50 border border-magicBorder text-white px-5 py-3 rounded-2xl font-semibold transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i>
+                        <span>Leaderboard</span>
+                    </button>
+                    <button onclick="navigateTo('certificate')" class="bg-magicCard hover:bg-purple-900/50 border border-magicBorder text-white px-5 py-3 rounded-2xl font-semibold transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-certificate text-indigo-400"></i>
+                        <span>My Certificate</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats & Progress Overview -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-magicCard border border-magicBorder rounded-2xl p-5">
+                    <div class="text-xs font-bold uppercase text-purple-400 mb-1">Total Score</div>
+                    <div id="stat-total-score" class="font-cinzel text-3xl font-extrabold text-amber-400">0</div>
+                </div>
+                <div class="bg-magicCard border border-magicBorder rounded-2xl p-5">
+                    <div class="text-xs font-bold uppercase text-purple-400 mb-1">Current Streak</div>
+                    <div id="stat-streak" class="font-cinzel text-3xl font-extrabold text-emerald-400">0 ⚡</div>
+                </div>
+                <div class="bg-magicCard border border-magicBorder rounded-2xl p-5">
+                    <div class="text-xs font-bold uppercase text-purple-400 mb-1">Spells Mastered</div>
+                    <div id="stat-correct" class="font-cinzel text-3xl font-extrabold text-white">0</div>
+                </div>
+                <div class="bg-magicCard border border-magicBorder rounded-2xl p-5">
+                    <div class="text-xs font-bold uppercase text-purple-400 mb-1">Badges Earned</div>
+                    <div id="stat-badges-count" class="font-cinzel text-3xl font-extrabold text-purple-300">0 / 4</div>
+                </div>
+            </div>
+
+            <!-- Progress Bar Section -->
+            <div class="bg-magicCard border border-magicBorder rounded-2xl p-6 space-y-3">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-line text-amber-400"></i>
+                        <span>Wizard Rank Progression</span>
+                    </span>
+                    <span id="progress-rank-label" class="text-purple-300 font-semibold">Novice Initiate (0 / 100 pts)</span>
+                </div>
+                <div class="w-full bg-magicDark rounded-full h-4 overflow-hidden border border-magicBorder">
+                    <div id="progress-bar-fill" class="bg-gradient-to-r from-purple-600 to-amber-400 h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Game Mode Selection & Difficulty -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Game Modes -->
+                <div class="lg:col-span-2 space-y-6">
+                    <h3 class="font-cinzel text-2xl font-bold text-white flex items-center space-x-3">
+                        <i class="fa-solid fa-book-sparkles text-amber-400"></i>
+                        <span>Select Grimoire Trial</span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Addition -->
+                        <div class="bg-magicCard border border-magicBorder rounded-2xl p-6 hover:border-purple-500 transition-all flex flex-col justify-between group">
+                            <div>
+                                <div class="w-12 h-12 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                                    <i class="fa-solid fa-plus text-xl"></i>
+                                </div>
+                                <h4 class="font-cinzel text-lg font-bold text-white mb-1">Addition Spell</h4>
+                                <p class="text-purple-300/80 text-xs mb-4">Channel swift sums to charge your wizard wand.</p>
+                            </div>
+                            <button onclick="prepareGame('addition')" class="w-full bg-purple-600/30 hover:bg-purple-600 text-purple-200 hover:text-white border border-purple-500/40 py-2.5 rounded-xl text-sm font-semibold transition-all">
+                                Launch Trial
+                            </button>
+                        </div>
+
+                        <!-- Subtraction -->
+                        <div class="bg-magicCard border border-magicBorder rounded-2xl p-6 hover:border-indigo-500 transition-all flex flex-col justify-between group">
+                            <div>
+                                <div class="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                    <i class="fa-solid fa-minus text-xl"></i>
+                                </div>
+                                <h4 class="font-cinzel text-lg font-bold text-white mb-1">Subtraction Vault</h4>
+                                <p class="text-purple-300/80 text-xs mb-4">Deduct mystical residues with exact precision.</p>
+                            </div>
+                            <button onclick="prepareGame('subtraction')" class="w-full bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/40 py-2.5 rounded-xl text-sm font-semibold transition-all">
+                                Launch Trial
+                            </button>
+                        </div>
+
+                        <!-- Multiplication -->
+                        <div class="bg-magicCard border border-magicBorder rounded-2xl p-6 hover:border-amber-500 transition-all flex flex-col justify-between group">
+                            <div>
+                                <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 group-hover:bg-amber-500 group-hover:text-magicDark transition-all">
+                                    <i class="fa-solid fa-xmark text-xl"></i>
+                                </div>
+                                <h4 class="font-cinzel text-lg font-bold text-white mb-1">Multiplication Rune</h4>
+                                <p class="text-purple-300/80 text-xs mb-4">Master times-table enchantment runes against time.</p>
+                            </div>
+                            <button onclick="prepareGame('multiplication')" class="w-full bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-magicDark border border-amber-500/40 py-2.5 rounded-xl text-sm font-semibold transition-all">
+                                Launch Trial
+                            </button>
+                        </div>
+
+                        <!-- Mixed Practice -->
+                        <div class="bg-magicCard border border-magicBorder rounded-2xl p-6 hover:border-emerald-500 transition-all flex flex-col justify-between group">
+                            <div>
+                                <div class="w-12 h-12 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                                </div>
+                                <h4 class="font-cinzel text-lg font-bold text-white mb-1">Arcane Mix</h4>
+                                <p class="text-purple-300/80 text-xs mb-4">A random trial of addition, subtraction, and multiplication.</p>
+                            </div>
+                            <button onclick="prepareGame('mixed')" class="w-full bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 hover:text-white border border-emerald-500/40 py-2.5 rounded-xl text-sm font-semibold transition-all">
+                                Launch Trial
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Difficulty Settings Panel -->
+                <div class="space-y-6">
+                    <h3 class="font-cinzel text-2xl font-bold text-white flex items-center space-x-3">
+                        <i class="fa-solid fa-sliders text-amber-400"></i>
+                        <span>Trial Difficulty</span>
+                    </h3>
+
+                    <div class="bg-magicCard border border-magicBorder rounded-2xl p-6 space-y-4">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-purple-300">Select Difficulty Level</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="setDifficulty('easy')" id="diff-btn-easy" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-magicBorder bg-purple-600 text-white transition-all">Easy (1-10)</button>
+                                <button onclick="setDifficulty('medium')" id="diff-btn-medium" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-magicBorder bg-magicDark text-purple-300 transition-all">Medium (1-50)</button>
+                                <button onclick="setDifficulty('hard')" id="diff-btn-hard" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-magicBorder bg-magicDark text-purple-300 transition-all">Hard (1-100)</button>
+                                <button onclick="setDifficulty('custom')" id="diff-btn-custom" class="py-2.5 px-3 rounded-xl text-xs font-bold border border-magicBorder bg-magicDark text-purple-300 transition-all">Custom Range</button>
+                            </div>
+                        </div>
+
+                        <div id="custom-range-box" class="hidden space-y-2 pt-2 border-t border-magicBorder">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-amber-300">Custom Max Number (1 to N)</label>
+                            <input type="number" id="custom-max-val" min="5" max="1000" value="20" onchange="updateCustomRange(this.value)"
+                                class="w-full bg-magicDark border border-magicBorder focus:border-amber-400 text-white font-semibold py-2 px-3 rounded-xl outline-none">
+                        </div>
+
+                        <div class="pt-2">
+                            <div class="text-xs text-purple-400 font-medium">Current Setting:</div>
+                            <div id="diff-description" class="text-sm font-bold text-white mt-0.5">Numbers between 1 and 10</div>
+                        </div>
+                    </div>
+
+                    <!-- Badges Preview Card -->
+                    <div class="bg-magicCard border border-magicBorder rounded-2xl p-6 space-y-3">
+                        <h4 class="font-cinzel text-sm font-bold text-white flex items-center space-x-2">
+                            <i class="fa-solid fa-award text-amber-400"></i>
+                            <span>Earnable Wizard Badges</span>
+                        </h4>
+                        <div class="grid grid-cols-4 gap-2 text-center" id="badges-preview-grid">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: GAME ARENA -->
+        <div id="view-game" class="hidden max-w-xl mx-auto space-y-6">
+            <div class="bg-magicCard border border-magicBorder rounded-2xl p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-400">
+                        <i id="arena-mode-icon" class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h4 id="arena-mode-title" class="font-cinzel font-bold text-white text-lg">Addition Spell</h4>
+                        <p class="text-xs text-purple-300">Difficulty: <span id="arena-diff-label">Easy</span></p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="text-center">
+                        <span class="block text-xs text-purple-300 font-semibold uppercase">Time</span>
+                        <span id="game-timer" class="font-mono text-xl font-bold text-amber-400">45s</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-xs text-purple-300 font-semibold uppercase">Score</span>
+                        <span id="game-score" class="font-mono text-xl font-bold text-purple-300">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problem Card -->
+            <div class="bg-magicCard border border-magicBorder rounded-3xl p-8 text-center relative overflow-hidden magical-glow">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-amber-400 to-indigo-500"></div>
+                
+                <div class="my-6">
+                    <div class="flex justify-center items-center space-x-2 mb-2">
+                        <span class="text-xs tracking-widest uppercase text-purple-400 font-bold bg-purple-950/60 px-3 py-1 rounded-full border border-purple-800/50">Streak: <span id="game-streak-count" class="text-emerald-400">0</span></span>
+                    </div>
+                    <div id="game-problem-text" class="font-cinzel text-4xl sm:text-5xl font-extrabold text-white my-8 tracking-wider">
+                        7 + 5 = ?
+                    </div>
+                </div>
+
+                <form id="game-form" onsubmit="submitGameAnswer(event)" class="space-y-4 max-w-sm mx-auto">
+                    <input type="number" id="game-user-input" autofocus autocomplete="off" placeholder="Answer..." 
+                        class="w-full bg-magicDark border-2 border-magicBorder focus:border-amber-400 text-white text-center text-2xl font-bold py-3.5 px-4 rounded-2xl outline-none transition-all placeholder:text-gray-600">
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg text-lg flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-bolt text-amber-300"></i>
+                        <span>Cast Answer</span>
+                    </button>
+                </form>
+
+                <div id="game-feedback" class="h-6 mt-4 text-sm font-semibold transition-all"></div>
+            </div>
+            
+            <div class="text-center">
+                <button onclick="quitGame()" class="text-xs font-bold text-purple-400 hover:text-white transition-all underline">
+                    Quit to Dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 4: GAME OVER SUMMARY -->
+        <div id="view-gameover" class="hidden max-w-md mx-auto">
+            <div class="bg-magicCard border border-magicBorder rounded-3xl p-8 text-center magical-glow space-y-6">
+                <div class="w-20 h-20 bg-amber-400/20 border border-amber-400/30 rounded-3xl mx-auto flex items-center justify-center text-amber-400 text-4xl gold-glow">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div>
+                    <h3 class="font-cinzel text-3xl font-bold text-white mb-2">Trial Complete!</h3>
+                    <p class="text-purple-300 text-sm">Your trial score has been permanently recorded.</p>
+                </div>
+
+                <div class="bg-magicDark/80 border border-magicBorder rounded-2xl p-6 grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-xs text-purple-400 uppercase font-bold">Trial Score</span>
+                        <div id="go-score" class="font-cinzel text-3xl font-extrabold text-amber-400 mt-1">0</div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-purple-400 uppercase font-bold">Spells Solved</span>
+                        <div id="go-correct" class="font-cinzel text-3xl font-extrabold text-white mt-1">0</div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4 pt-2">
+                    <button onclick="restartGame()" class="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Play Again
+                    </button>
+                    <button onclick="navigateTo('dashboard')" class="flex-1 bg-magicBorder hover:bg-purple-800 text-white font-bold py-3.5 rounded-xl transition-all">
+                        <i class="fa-solid fa-house mr-2"></i> Hub
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: LEADERBOARD -->
+        <div id="view-leaderboard" class="hidden max-w-3xl mx-auto space-y-6">
+            <div class="bg-magicCard border border-magicBorder rounded-3xl p-8 magical-glow space-y-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-magicBorder pb-6">
+                    <div>
+                        <span class="bg-amber-400/10 text-amber-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-amber-400/20">Arcane Rankings</span>
+                        <h2 class="font-cinzel text-3xl font-bold text-white mt-2">Top 10 Wizard Leaderboard</h2>
+                    </div>
+                    <button onclick="navigateTo('dashboard')" class="bg-magicBorder hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Back to Hub
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-magicBorder text-xs uppercase tracking-wider text-purple-400 font-bold">
+                                <th class="py-3 px-4">Rank</th>
+                                <th class="py-3 px-4">Wizard Pupil</th>
+                                <th class="py-3 px-4 text-right">Total Score</th>
+                                <th class="py-3 px-4 text-right">Correct Spells</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-tbody" class="divide-y divide-magicBorder text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 6: CERTIFICATE OF ACHIEVEMENT -->
+        <div id="view-certificate" class="hidden max-w-3xl mx-auto space-y-6">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('dashboard')" class="bg-magicCard hover:bg-purple-900/50 border border-magicBorder text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Hub
+                </button>
+                <button onclick="window.print()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-magicDark font-bold px-5 py-2 rounded-xl text-sm shadow-lg gold-glow transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print / Save Certificate</span>
+                </button>
+            </div>
+
+            <!-- Certificate Card -->
+            <div id="certificate-print-area" class="bg-gradient-to-br from-amber-50/95 via-white to-purple-50/95 text-gray-900 border-8 border-amber-400 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden text-center space-y-6">
+                <!-- Watermark logo -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                    <i class="fa-solid fa-hat-wizard text-[280px] text-purple-900"></i>
+                </div>
+
+                <div class="relative z-10 space-y-4">
+                    <div class="flex items-center justify-center space-x-3">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-900 flex items-center justify-center text-amber-300">
+                            <i class="fa-solid fa-hat-wizard text-2xl"></i>
+                        </div>
+                        <h1 class="font-cinzel text-2xl md:text-3xl font-extrabold tracking-widest text-purple-900">UNIWITZ ACADEMY</h1>
+                    </div>
+
+                    <div class="space-y-1 pt-2">
+                        <h3 class="font-cinzel text-xs uppercase tracking-[0.3em] font-bold text-purple-700">Certificate of Mathematical Mastery</h3>
+                        <h2 class="font-cinzel text-3xl md:text-5xl font-black text-amber-600 pt-2">Grand Wizard Award</h2>
+                    </div>
+
+                    <p class="text-sm text-gray-600 pt-2">This official magical parchment is proudly presented to</p>
+
+                    <div class="py-2">
+                        <div class="inline-block border-b-2 border-purple-900 pb-1 px-8">
+                            <span id="cert-avatar" class="text-3xl mr-2">🧙‍♂️</span>
+                            <span id="cert-username" class="font-cinzel text-3xl md:text-4xl font-extrabold text-purple-950">Wizard Name</span>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-700 max-w-lg mx-auto leading-relaxed pt-2">
+                        For exceptional dedication, lightning mental calculation, and mastering mathematical incantations within the Universal Wizards realm.
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-4 max-w-md mx-auto pt-4 bg-purple-900/5 rounded-2xl p-4 border border-purple-900/10">
+                        <div>
+                            <div class="text-[10px] uppercase font-bold text-purple-800">Total Score</div>
+                            <div id="cert-score" class="font-cinzel text-xl font-extrabold text-amber-600">0</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] uppercase font-bold text-purple-800">Spells Solved</div>
+                            <div id="cert-correct" class="font-cinzel text-xl font-extrabold text-purple-900">0</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] uppercase font-bold text-purple-800">Badges</div>
+                            <div id="cert-badges" class="font-cinzel text-xl font-extrabold text-indigo-700">0/4</div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-end pt-12 px-6">
+                        <div class="text-left">
+                            <div class="font-cinzel text-sm font-bold text-purple-900 border-t border-purple-900 pt-1">Archmage Mentor</div>
+                            <div class="text-[10px] text-gray-500">UniWitz Academy Faculty</div>
+                        </div>
+                        <div class="w-16 h-16 rounded-full bg-amber-400/20 border-2 border-amber-500 flex items-center justify-center text-amber-600 text-2xl">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div class="text-right">
+                            <div id="cert-date" class="font-cinzel text-sm font-bold text-purple-900 border-t border-purple-900 pt-1">2026-03-30</div>
+                            <div class="text-[10px] text-gray-500">Official Seal</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- TEACHER DASHBOARD MODAL -->
+    <div id="teacher-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-magicCard border border-magicBorder rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6 magical-glow">
+            <div class="flex items-center justify-between border-b border-magicBorder pb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-cinzel text-xl font-bold text-white">Teacher Dashboard</h3>
+                        <p class="text-xs text-purple-300">Manage pupils, view reports, and export grades</p>
+                    </div>
+                </div>
+                <button onclick="closeTeacherModal()" class="text-purple-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Teacher Dashboard Actions -->
+            <div class="flex flex-wrap gap-3 items-center justify-between bg-magicDark/60 p-4 rounded-2xl border border-magicBorder">
+                <div class="flex items-center space-x-2">
+                    <button onclick="exportToCSV()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow flex items-center space-x-2">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Export to CSV / Excel</span>
+                    </button>
+                    <button onclick="resetAllPupilData()" class="bg-rose-950/60 hover:bg-rose-900/80 border border-rose-900/50 text-rose-300 text-xs font-bold px-4 py-2.5 rounded-xl transition-all">
+                        Reset All Scores
+                    </button>
+                </div>
+                <div class="text-xs text-purple-300 font-semibold">
+                    Total Registered Pupils: <span id="teacher-pupil-count" class="text-amber-400 font-bold">0</span>
+                </div>
+            </div>
+
+            <!-- Add Pupil Form -->
+            <div class="bg-magicDark/40 p-5 rounded-2xl border border-magicBorder space-y-4">
+                <h4 class="font-cinzel text-sm font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus text-amber-400"></i>
+                    <span>Add New Pupil to Class List</span>
+                </h4>
+                <form onsubmit="handleTeacherAddPupil(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <input type="text" id="teacher-new-name" required placeholder="Pupil Full Name" 
+                        class="bg-magicDark border border-magicBorder focus:border-amber-400 text-white text-sm py-2.5 px-3 rounded-xl outline-none">
+                    <select id="teacher-new-avatar" class="bg-magicDark border border-magicBorder focus:border-amber-400 text-white text-sm py-2.5 px-3 rounded-xl outline-none">
+                        <option value="🧙‍♂️">🧙‍♂️ Wizard Male</option>
+                        <option value="🧙‍♀️">🧙‍♀️ Wizard Female</option>
+                        <option value="🦉">🦉 Wise Owl</option>
+                        <option value="🔮">🔮 Crystal Ball</option>
+                        <option value="⚡">⚡ Lightning Bolt</option>
+                        <option value="🐉">🐉 Dragon</option>
+                        <option value="🦄">🦄 Unicorn</option>
+                        <option value="🐱">🐱 Cat Familiar</option>
+                    </select>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold py-2.5 px-4 rounded-xl transition-all shadow">
+                        Add Pupil
+                    </button>
+                </form>
+            </div>
+
+            <!-- Pupils List Table -->
+            <div class="space-y-3">
+                <h4 class="font-cinzel text-sm font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-users text-amber-400"></i>
+                    <span>Classroom Pupil Roster & Progress</span>
+                </h4>
+                <div class="overflow-x-auto border border-magicBorder rounded-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-magicDark/80 border-b border-magicBorder text-[11px] uppercase tracking-wider text-purple-400 font-bold">
+                                <th class="py-3 px-4">Avatar & Name</th>
+                                <th class="py-3 px-4 text-center">Score</th>
+                                <th class="py-3 px-4 text-center">Correct</th>
+                                <th class="py-3 px-4 text-center">Streak</th>
+                                <th class="py-3 px-4 text-center">Badges</th>
+                                <th class="py-3 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacher-roster-tbody" class="divide-y divide-magicBorder text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-magicBorder bg-magicDark/50 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-purple-400/70">
+            <p>&copy; 2026 UniWitz (Universal Wizards). Empowering classrooms and young minds with free mathematical magic.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // --- DATA & STATE MANAGEMENT ---
+        const DEFAULT_PUPILS = [
+            { id: 'p1', name: 'Hermione G.', avatar: '🧙‍♀️', score: 240, correct: 24, streak: 5, badges: ['bronze', 'silver', 'gold'] },
+            { id: 'p2', name: 'Harry P.', avatar: '🧙‍♂️', score: 180, correct: 18, streak: 3, badges: ['bronze', 'silver'] },
+            { id: 'p3', name: 'Luna L.', avatar: '🔮', score: 150, correct: 15, streak: 2, badges: ['bronze'] },
+            { id: 'p4', name: 'Ron W.', avatar: '⚡', score: 90, correct: 9, streak: 0, badges: ['bronze'] }
+        ];
+
+        const AVATAR_OPTIONS = ['🧙‍♂️', '🧙‍♀️', '🦉', '🔮', '⚡', '🐉', '🦄', '🐱', '✨', '🌟'];
+
+        let appState = {
+            currentPupilId: null,
+            difficulty: 'easy', // 'easy', 'medium', 'hard', 'custom'
+            customMax: 20,
+            selectedGameMode: 'addition',
+            pupils: []
+        };
+
+        // Game session variables
+        let gameActive = false;
+        let gameScore = 0;
+        let gameCorrect = 0;
+        let gameStreak = 0;
+        let gameTimeLeft = 45;
+        let gameTimerInterval = null;
+        let currentProblem = { text: '', answer: 0 };
+
+        // Initialize LocalStorage & State
+        function initApp() {
+            const saved = localStorage.getItem('uniwitz_pupils_v2');
+            if (saved) {
+                try {
+                    appState.pupils = JSON.parse(saved);
+                } catch(e) {
+                    appState.pupils = DEFAULT_PUPILS;
+                }
+            } else {
+                appState.pupils = DEFAULT_PUPILS;
+                savePupils();
+            }
+
+            // Check if student was logged in
+            const lastId = localStorage.getItem('uniwitz_active_pupil');
+            if (lastId && appState.pupils.find(p => p.id === lastId)) {
+                appState.currentPupilId = lastId;
+                navigateTo('dashboard');
+            } else {
+                renderAvatarPicker();
+                navigateTo('login');
+            }
+        }
+
+        function savePupils() {
+            localStorage.setItem('uniwitz_pupils_v2', JSON.stringify(appState.pupils));
+        }
+
+        function getCurrentPupil() {
+            return appState.pupils.find(p => p.id === appState.currentPupilId) || null;
+        }
+
+        // --- NAVIGATION CONTROLLER ---
+        function navigateTo(viewName) {
+            const views = ['login', 'dashboard', 'game', 'gameover', 'leaderboard', 'certificate'];
+            views.forEach(v => {
+                const el = document.getElementById('view-' + v);
+                if (el) el.classList.add('hidden');
+            });
+
+            const target = document.getElementById('view-' + viewName);
+            if (target) target.classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Refresh view-specific data
+            if (viewName === 'dashboard') {
+                updateDashboardUI();
+            } else if (viewName === 'leaderboard') {
+                renderLeaderboard();
+            } else if (viewName === 'certificate') {
+                renderCertificate();
+            }
+        }
+
+        // --- LOGIN & AVATAR PICKER ---
+        let selectedLoginAvatar = '🧙‍♂️';
+
+        function renderAvatarPicker() {
+            const grid = document.getElementById('avatar-picker-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            AVATAR_OPTIONS.forEach((av, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `text-2xl p-3 rounded-2xl border transition-all ${idx === 0 ? 'bg-purple-600/30 border-amber-400' : 'bg-magicDark border-magicBorder hover:border-purple-500'}`;
+                btn.innerHTML = av;
+                btn.onclick = () => {
+                    document.querySelectorAll('#avatar-picker-grid button').forEach(b => {
+                        b.className = 'text-2xl p-3 rounded-2xl border bg-magicDark border-magicBorder hover:border-purple-500';
+                    });
+                    btn.className = 'text-2xl p-3 rounded-2xl border bg-purple-600/30 border-amber-400';
+                    selectedLoginAvatar = av;
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleStudentLogin(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('login-name').value.trim();
+            if (!nameInput) return;
+
+            // Check if pupil already exists, or create new
+            let pupil = appState.pupils.find(p => p.name.toLowerCase() === nameInput.toLowerCase());
+            if (!pupil) {
+                pupil = {
+                    id: 'p_' + Date.now(),
+                    name: nameInput,
+                    avatar: selectedLoginAvatar,
+                    score: 0,
+                    correct: 0,
+                    streak: 0,
+                    badges: ['bronze'] // Starting badge
+                };
+                appState.pupils.push(pupil);
+            } else {
+                pupil.avatar = selectedLoginAvatar; // update avatar if changed
+            }
+
+            appState.currentPupilId = pupil.id;
+            localStorage.setItem('uniwitz_active_pupil', pupil.id);
+            savePupils();
+
+            document.getElementById('login-name').value = '';
+            navigateTo('dashboard');
+        }
+
+        function logoutStudent() {
+            appState.currentPupilId = null;
+            localStorage.removeItem('uniwitz_active_pupil');
+            renderAvatarPicker();
+            navigateTo('login');
+        }
+
+        // --- DASHBOARD UI & PROGRESS ---
+        function updateDashboardUI() {
+            const pupil = getCurrentPupil();
+            if (!pupil) {
+                navigateTo('login');
+                return;
+            }
+
+            // Top Header Badge
+            document.getElementById('logged-user-badge').classList.remove('hidden');
+            document.getElementById('logged-user-badge').classList.add('flex');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            document.getElementById('nav-avatar').innerText = pupil.avatar;
+            document.getElementById('nav-username').innerText = pupil.name;
+            document.getElementById('nav-score').innerText = pupil.score;
+
+            // Hero banner
+            document.getElementById('dash-avatar').innerText = pupil.avatar;
+            document.getElementById('dash-welcome-name').innerText = `Welcome back, ${pupil.name}!`;
+
+            // Stats
+            document.getElementById('stat-total-score').innerText = pupil.score;
+            document.getElementById('stat-streak').innerText = (pupil.streak || 0) + ' ⚡';
+            document.getElementById('stat-correct').innerText = pupil.correct || 0;
+            
+            const badgesCount = (pupil.badges || []).length;
+            document.getElementById('stat-badges-count').innerText = `${badgesCount} / 4`;
+
+            // Progression Bar Calculation (Rank thresholds: 0, 100, 300, 600, 1000)
+            const score = pupil.score;
+            let rankName = 'Novice Initiate';
+            let nextThreshold = 100;
+            let prevThreshold = 0;
+
+            if (score >= 1000) {
+                rankName = 'Archmage Wizard 🌟';
+                nextThreshold = 1000;
+                prevThreshold = 1000;
+            } else if (score >= 600) {
+                rankName = 'Master Sorcerer 🔮';
+                nextThreshold = 1000;
+                prevThreshold = 600;
+            } else if (score >= 300) {
+                rankName = 'Adept Spellcaster ⚡';
+                nextThreshold = 600;
+                prevThreshold = 300;
+            } else if (score >= 100) {
+                rankName = 'Apprentice Wizard 📜';
+                nextThreshold = 300;
+                prevThreshold = 100;
+            }
+
+            let pct = 100;
+            if (prevThreshold !== nextThreshold) {
+                pct = Math.min(100, Math.max(0, ((score - prevThreshold) / (nextThreshold - prevThreshold)) * 100));
+            }
+
+            document.getElementById('progress-rank-label').innerText = `${rankName} (${score} / ${nextThreshold} pts)`;
+            document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+
+            renderBadgesPreview(pupil);
+        }
+
+        function renderBadgesPreview(pupil) {
+            const grid = document.getElementById('badges-preview-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const allBadges = [
+                { id: 'bronze', icon: 'fa-award', color: 'text-amber-700', title: 'Initiate Badge (Play 1 Trial)' },
+                { id: 'silver', icon: 'fa-medal', color: 'text-slate-300', title: 'Sorcerer Badge (100+ Pts)' },
+                { id: 'gold', icon: 'fa-trophy', color: 'text-amber-400', title: 'Grand Mage Badge (300+ Pts)' },
+                { id: 'streak', icon: 'fa-bolt', color: 'text-emerald-400', title: 'Lightning Streak (5+ Streak)' }
+            ];
+
+            // Check & award badges automatically
+            let badges = pupil.badges || [];
+            if (!badges.includes('bronze')) badges.push('bronze');
+            if (pupil.score >= 100 && !badges.includes('silver')) badges.push('silver');
+            if (pupil.score >= 300 && !badges.includes('gold')) badges.push('gold');
+            if ((pupil.streak || 0) >= 5 && !badges.includes('streak')) badges.push('streak');
+            pupil.badges = badges;
+            savePupils();
+
+            allBadges.forEach(b => {
+                const unlocked = badges.includes(b.id);
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-2xl border flex flex-col items-center justify-center space-y-1 ${unlocked ? 'bg-magicDark border-amber-400/40' : 'bg-magicDark/40 border-magicBorder opacity-40'}`;
+                div.title = b.title;
+                div.innerHTML = `
+                    <i class="fa-solid ${b.icon} text-xl ${unlocked ? b.color : 'text-gray-600'}"></i>
+                    <span class="text-[10px] font-bold text-purple-300 uppercase">${b.id}</span>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // --- DIFFICULTY SETTINGS ---
+        function setDifficulty(diff) {
+            appState.difficulty = diff;
+            ['easy', 'medium', 'hard', 'custom'].forEach(d => {
+                const btn = document.getElementById(`diff-btn-${d}`);
+                if (!btn) return;
+                if (d === diff) {
+                    btn.className = 'py-2.5 px-3 rounded-xl text-xs font-bold border border-amber-400 bg-purple-600 text-white shadow';
+                } else {
+                    btn.className = 'py-2.5 px-3 rounded-xl text-xs font-bold border border-magicBorder bg-magicDark text-purple-300 hover:border-purple-500';
+                }
+            });
+
+            const customBox = document.getElementById('custom-range-box');
+            const descEl = document.getElementById('diff-description');
+
+            if (diff === 'easy') {
+                customBox.classList.add('hidden');
+                descEl.innerText = 'Numbers between 1 and 10';
+            } else if (diff === 'medium') {
+                customBox.classList.add('hidden');
+                descEl.innerText = 'Numbers between 1 and 50';
+            } else if (diff === 'hard') {
+                customBox.classList.add('hidden');
+                descEl.innerText = 'Numbers between 1 and 100';
+            } else if (diff === 'custom') {
+                customBox.classList.remove('hidden');
+                descEl.innerText = `Custom numbers between 1 and ${appState.customMax}`;
+            }
+        }
+
+        function updateCustomRange(val) {
+            let num = parseInt(val, 10);
+            if (isNaN(num) || num < 5) num = 20;
+            appState.customMax = num;
+            document.getElementById('diff-description').innerText = `Custom numbers between 1 and ${num}`;
+        }
+
+        // --- GAMEPLAY ENGINE ---
+        function prepareGame(mode) {
+            appState.selectedGameMode = mode;
+            gameScore = 0;
+            gameCorrect = 0;
+            gameStreak = 0;
+            gameTimeLeft = 45;
+
+            const modeTitles = {
+                addition: 'Addition Spell',
+                subtraction: 'Subtraction Vault',
+                multiplication: 'Multiplication Rune',
+                mixed: 'Arcane Mix Trial'
+            };
+
+            document.getElementById('arena-mode-title').innerText = modeTitles[mode] || 'Math Trial';
+            document.getElementById('arena-diff-label').innerText = appState.difficulty.toUpperCase();
+            document.getElementById('game-score').innerText = '0';
+            document.getElementById('game-streak-count').innerText = '0';
+            document.getElementById('game-timer').innerText = gameTimeLeft + 's';
+
+            navigateTo('game');
+            generateNewProblem();
+
+            if (gameTimerInterval) clearInterval(gameTimerInterval);
+            gameTimerInterval = setInterval(() => {
+                gameTimeLeft--;
+                document.getElementById('game-timer').innerText = gameTimeLeft + 's';
+                if (gameTimeLeft <= 0) {
+                    clearInterval(gameTimerInterval);
+                    endGameSession();
+                }
+            }, 1000);
+        }
+
+        function generateNewProblem() {
+            let maxRange = 10;
+            if (appState.difficulty === 'medium') maxRange = 50;
+            else if (appState.difficulty === 'hard') maxRange = 100;
+            else if (appState.difficulty === 'custom') maxRange = appState.customMax;
+
+            let mode = appState.selectedGameMode;
+            if (mode === 'mixed') {
+                const subModes = ['addition', 'subtraction', 'multiplication'];
+                mode = subModes[Math.floor(Math.random() * subModes.length)];
+            }
+
+            let n1, n2, opSymbol, answer;
+
+            if (mode === 'addition') {
+                n1 = Math.floor(Math.random() * maxRange) + 1;
+                n2 = Math.floor(Math.random() * maxRange) + 1;
+                opSymbol = '+';
+                answer = n1 + n2;
+            } else if (mode === 'subtraction') {
+                n1 = Math.floor(Math.random() * maxRange) + 1;
+                n2 = Math.floor(Math.random() * maxRange) + 1;
+                if (n1 < n2) { let temp = n1; n1 = n2; n2 = temp; } // ensure positive
+                opSymbol = '-';
+                answer = n1 - n2;
+            } else if (mode === 'multiplication') {
+                let limit = Math.min(maxRange, 12);
+                if (appState.difficulty === 'hard' || appState.difficulty === 'custom') limit = Math.min(maxRange, 20);
+                n1 = Math.floor(Math.random() * limit) + 1;
+                n2 = Math.floor(Math.random() * limit) + 1;
+                opSymbol = '×';
+                answer = n1 * n2;
+            }
+
+            currentProblem = { text: `${n1} ${opSymbol} ${n2} = ?`, answer: answer };
+            document.getElementById('game-problem-text').innerText = currentProblem.text;
+            document.getElementById('game-user-input').value = '';
+            document.getElementById('game-feedback').innerText = '';
+        }
+
+        function submitGameAnswer(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('game-user-input');
+            const val = inputEl.value.trim();
+            if (val === '') return;
+
+            const userAns = parseInt(val, 10);
+            const feedbackEl = document.getElementById('game-feedback');
+
+            if (userAns === currentProblem.answer) {
+                gameScore += 10;
+                gameCorrect++;
+                gameStreak++;
+                document.getElementById('game-score').innerText = gameScore;
+                document.getElementById('game-streak-count').innerText = gameStreak;
+
+                feedbackEl.className = 'h-6 mt-4 text-sm font-semibold text-emerald-400';
+                feedbackEl.innerText = '✨ Incantation successful! +10 pts';
+
+                setTimeout(() => {
+                    generateNewProblem();
+                }, 350);
+            } else {
+                gameStreak = 0;
+                document.getElementById('game-streak-count').innerText = gameStreak;
+                feedbackEl.className = 'h-6 mt-4 text-sm font-semibold text-rose-400';
+                feedbackEl.innerText = '⚡ Spell fizzled! Incorrect answer, try again.';
+                inputEl.value = '';
+                inputEl.focus();
+            }
+        }
+
+        function quitGame() {
+            if (gameTimerInterval) clearInterval(gameTimerInterval);
+            navigateTo('dashboard');
+        }
+
+        function endGameSession() {
+            if (gameTimerInterval) clearInterval(gameTimerInterval);
+
+            // Update pupil stats in storage
+            const pupil = getCurrentPupil();
+            if (pupil) {
+                pupil.score += gameScore;
+                pupil.correct += gameCorrect;
+                if (gameStreak > (pupil.streak || 0)) {
+                    pupil.streak = gameStreak;
+                }
+                savePupils();
+            }
+
+            document.getElementById('go-score').innerText = gameScore;
+            document.getElementById('go-correct').innerText = gameCorrect;
+            navigateTo('gameover');
+        }
+
+        function restartGame() {
+            prepareGame(appState.selectedGameMode);
+        }
+
+        // --- LEADERBOARD ---
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            // Sort pupils descending by score
+            const sorted = [...appState.pupils].sort((a, b) => b.score - a.score).slice(0, 10);
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-purple-400">No wizards recorded yet.</td></tr>`;
+                return;
+            }
+
+            sorted.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-magicDark/40 transition-all';
+                let rankBadge = `<span class="font-mono font-bold text-purple-300">#${idx + 1}</span>`;
+                if (idx === 0) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400/20 text-amber-400 font-bold border border-amber-400/40">1</span>`;
+                else if (idx === 1) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-300/20 text-slate-300 font-bold border border-slate-300/40">2</span>`;
+                else if (idx === 2) rankBadge = `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-700/20 text-amber-600 font-bold border border-amber-700/40">3</span>`;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4">${rankBadge}</td>
+                    <td class="py-3 px-4 flex items-center space-x-3">
+                        <span class="text-2xl">${p.avatar}</span>
+                        <span class="font-bold text-white">${p.name}</span>
+                    </td>
+                    <td class="py-3 px-4 text-right font-mono font-bold text-amber-400">${p.score}</td>
+                    <td class="py-3 px-4 text-right font-mono text-purple-300">${p.correct || 0}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- CERTIFICATE ---
+        function renderCertificate() {
+            const pupil = getCurrentPupil();
+            if (!pupil) return;
+
+            document.getElementById('cert-avatar').innerText = pupil.avatar;
+            document.getElementById('cert-username').innerText = pupil.name;
+            document.getElementById('cert-score').innerText = pupil.score;
+            document.getElementById('cert-correct').innerText = pupil.correct || 0;
+            document.getElementById('cert-badges').innerText = `${(pupil.badges || []).length}/4`;
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('cert-date').innerText = today;
+        }
+
+        // --- TEACHER DASHBOARD ---
+        function openTeacherModal() {
+            renderTeacherRoster();
+            document.getElementById('teacher-modal').classList.remove('hidden');
+        }
+
+        function closeTeacherModal() {
+            document.getElementById('teacher-modal').classList.add('hidden');
+        }
+
+        function renderTeacherRoster() {
+            const tbody = document.getElementById('teacher-roster-tbody');
+            const countEl = document.getElementById('teacher-pupil-count');
+            if (!tbody || !countEl) return;
+
+            countEl.innerText = appState.pupils.length;
+            tbody.innerHTML = '';
+
+            if (appState.pupils.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-purple-400">No pupils in classroom roster.</td></tr>`;
+                return;
+            }
+
+            appState.pupils.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-magicDark/50 transition-all';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 flex items-center space-x-3">
+                        <span class="text-2xl">${p.avatar}</span>
+                        <span class="font-bold text-white">${p.name}</span>
+                    </td>
+                    <td class="py-3 px-4 text-center font-mono font-bold text-amber-400">${p.score}</td>
+                    <td class="py-3 px-4 text-center font-mono text-purple-300">${p.correct || 0}</td>
+                    <td class="py-3 px-4 text-center font-mono text-emerald-400">${p.streak || 0} ⚡</td>
+                    <td class="py-3 px-4 text-center font-mono text-indigo-300">${(p.badges || []).length}/4</td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick="resetPupilScore('${p.id}')" class="bg-purple-950/60 hover:bg-purple-900 border border-purple-800 text-purple-300 text-xs px-2.5 py-1 rounded-lg transition-all" title="Reset Score">
+                            Reset
+                        </button>
+                        <button onclick="deletePupil('${p.id}')" class="bg-rose-950/60 hover:bg-rose-900 border border-rose-900 text-rose-300 text-xs px-2.5 py-1 rounded-lg transition-all" title="Delete Pupil">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleTeacherAddPupil(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('teacher-new-name');
+            const avatarInput = document.getElementById('teacher-new-avatar');
+            const name = nameInput.value.trim();
+            if (!name) return;
+
+            const newPupil = {
+                id: 'p_' + Date.now(),
+                name: name,
+                avatar: avatarInput.value,
+                score: 0,
+                correct: 0,
+                streak: 0,
+                badges: ['bronze']
+            };
+
+            appState.pupils.push(newPupil);
+            savePupils();
+            nameInput.value = '';
+            renderTeacherRoster();
+        }
+
+        function resetPupilScore(id) {
+            const p = appState.pupils.find(item => item.id === id);
+            if (p) {
+                p.score = 0;
+                p.correct = 0;
+                p.streak = 0;
+                p.badges = ['bronze'];
+                savePupils();
+                renderTeacherRoster();
+                if (appState.currentPupilId === id) updateDashboardUI();
+            }
+        }
+
+        function deletePupil(id) {
+            appState.pupils = appState.pupils.filter(item => item.id !== id);
+            savePupils();
+            renderTeacherRoster();
+            if (appState.currentPupilId === id) {
+                logoutStudent();
+            }
+        }
+
+        function resetAllPupilData() {
+            appState.pupils.forEach(p => {
+                p.score = 0;
+                p.correct = 0;
+                p.streak = 0;
+                p.badges = ['bronze'];
+            });
+            savePupils();
+            renderTeacherRoster();
+            updateDashboardUI();
+        }
+
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Pupil ID,Pupil Name,Avatar,Total Score,Correct Spells,Max Streak,Badges Earned\n";
+            appState.pupils.forEach(p => {
+                const badgeStr = (p.badges || []).join(';');
+                csvContent += `"${p.id}","${p.name}","${p.avatar}",${p.score},${p.correct || 0},${p.streak || 0},"${badgeStr}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "uniwitz_classroom_report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize application on load
+        window.addEventListener('load', initApp);
+    </script>
+</body>
+</html>
